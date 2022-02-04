@@ -1,14 +1,15 @@
-RotorS
+RotorS - Modified
 ===============
+NOTE: This repository is a [fork](https://github.com/ethz-asl/rotors_simulator)!
 
 RotorS is a MAV gazebo simulator.
 It provides some multirotor models such as the [AscTec Hummingbird](http://www.asctec.de/en/uav-uas-drone-products/asctec-hummingbird/), the [AscTec Pelican](http://www.asctec.de/en/uav-uas-drone-products/asctec-pelican/), or the [AscTec Firefly](http://www.asctec.de/en/uav-uas-drone-products/asctec-firefly/), but the simulator is not limited for the use with these multicopters.
 
 There are simulated sensors coming with the simulator such as an IMU, a generic odometry sensor, and the [VI-Sensor](http://wiki.ros.org/vi_sensor), which can be mounted on the multirotor.
 
-This package also contains some example controllers, basic worlds, a joystick interface, and example launch files.
+This package also contains some example controllers, basic worlds, and example launch files.
 
-Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
+Below the ETHZ-asl group provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
 
 If you are using this simulator within the research for your publication, please cite:
 ```bibtex
@@ -29,70 +30,28 @@ doi="10.1007/978-3-319-26054-9_23",
 url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
 }
 ```
-Installation Instructions - Ubuntu 16.04 with ROS Kinetic
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic or newer
 ---------------------------------------------------------
- 1. Install and initialize ROS kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
+ 1. Install and initialize ROS [distro] desktop full, additional ROS packages, catkin-tools, and wstool:
 
  ```
  $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
  $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
  $ sudo apt-get update
- $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox ros-kinetic-mavros
+ $ sudo apt-get install ros-[distro]-desktop-full ros-[distro]-octomap-ros ros-[distro]-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-[distro]-control-toolbox ros-[distro]-mavros
  $ sudo rosdep init
  $ rosdep update
- $ source /opt/ros/kinetic/setup.bash
+ $ source /opt/ros/[distro]/setup.bash
  ```
+
  2. If you don't have ROS workspace yet you can do so by
 
  ```
  $ mkdir -p ~/catkin_ws/src
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
- $ wstool init
- $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
- $ wstool merge rotors_hil.rosinstall
- $ wstool update
  ```
 
-  > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
-
- 3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
-
-   ```
-   $ cd ~/catkin_ws/
-   $ catkin build
-   ```
-
- 4. Add sourcing to your `.bashrc` file
-
-   ```
-   $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
-   $ source ~/.bashrc
-   ```
-
-Installation Instructions - Ubuntu 14.04 with ROS Indigo
---------------------------------------------------------
-
- 1. Install and initialize ROS indigo desktop full, additional ROS packages, catkin-tools, and wstool:
-
- ```
- $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
- $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
- $ sudo apt-get update
- $ sudo apt-get install ros-indigo-desktop-full ros-indigo-joy ros-indigo-octomap-ros python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev
- $ sudo rosdep init
- $ rosdep update
- $ source /opt/ros/indigo/setup.bash
- ```
- 2. If you don't have ROS workspace yet you can do so by
-
- ```
- $ mkdir -p ~/catkin_ws/src
- $ cd ~/catkin_ws/src
- $ catkin_init_workspace  # initialize your catkin workspace
- $ wstool init
- ```
- > **Note** for setups with multiple workspaces please refer to the official documentation at http://docs.ros.org/independent/api/rosinstall/html/ by replacing `rosws` by `wstool`.
  3. Get the simulator and additional dependencies
 
  ```
@@ -100,29 +59,13 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
  $ git clone git@github.com:ethz-asl/rotors_simulator.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
  ```
-  > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
 
-  > **Note** if you want to use `wstool` you can replace the above commands with
-    ```
-    wstool set --git local_repo_name git@github.com:organization/repo_name.git
-    ```
-  > **Note** if you want to build and use the `gazebo_mavlink_interface` plugin you have to get MAVROS as an additional dependency from link below. Follow the installation instructions provided there and build all of its packages prior to building the rest of your workspace.
-    ```
-    https://github.com/mavlink/mavros
-    ```
  4. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
    $ cd ~/catkin_ws/
-   $ catkin init  # If you haven't done this before.
    $ catkin build
    ```
-   > **Note** if you are getting errors related to "future" package, you may need python future:
-    ```
-    sudo apt-get install python-pip
-    pip install --upgrade pip
-    pip install future
-    ```
 
  5. Add sourcing to your `.bashrc` file
 
@@ -130,6 +73,8 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
+
+  > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
 
 Basic Usage
 -----------
@@ -183,30 +128,6 @@ You can let the helicopter hover with ground truth odometry (perfect state estim
 $ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_name:=basic
 ```
 
-#### Create an attitude controller
-
-**TODO(ff):** `Write something here.`
-
-#### Usage with a joystick
-
-Connect a USB joystick to your computer and launch the simulation alongside ROS joystick driver and the RotorS joystick node:
-```
-$ roslaunch rotors_gazebo mav_with_joy.launch mav_name:=firefly world_name:=basic
-```
-
-Depending on the type of joystick and the personal preference for operation, you can assign the axis number using the `axis_<roll/pitch/thrust>_` parameter and the axis direction using the `axis_direction_<roll/pitch/thrust>` parameter.
-
-#### Usage with a keyboard
-
-First, perform a one-time setup of virtual keyboard joystick as described here: https://github.com/ethz-asl/rotors_simulator/wiki/Setup-virtual-keyboard-joystick.
-
-Launch the simulation with the keyboard interface using the following launch file:
-```
-$ roslaunch rotors_gazebo mav_with_keyboard.launch mav_name:=firefly world_name:=basic
-```
-
-If everything was setup correctly, an additional GUI should appear with bars indicating the current throttle, roll, pitch, and yaw inputs. While this window is active, the Arrows and W, A, S, D keys will generate virtual joystick inputs, which can then be processed by the RotorS joystick node in the same way as real joystick commands.
-
 Gazebo Version
 --------------
 
@@ -214,3 +135,15 @@ At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS 
 
 1. `iris.sdf` can only be generated with Gazebo >= `v3.0`, as it requires use of the `gz sdf ...` tool. If this requirement is not met, you will not be able to use the Iris MAV in any of the simulations.
 2. The Gazebo plugins `GazeboGeotaggedImagesPlugin`, `LidarPlugin` and the `LiftDragPlugin` all require Gazebo >= `v5.0`, and will not be built if this requirement is not met.
+
+Changes to the main branch
+--------------------------
+
+1. Changed the README.md file.
+2. Deleted some packages that had no usage in my work.
+
+**TODO:**
+
+3. Make a new controller for flight control.
+4. Import simple maps to world files.
+5. Make path-planning nodes to send velocity messages.
