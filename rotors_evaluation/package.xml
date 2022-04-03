@@ -1,7 +1,8 @@
+<?xml version="1.0"?>
 <package format="2">
-  <name>rotors_control</name>
+  <name>rotors_evaluation</name>
   <version>2.2.3</version>
-  <description>RotorS control package</description>
+  <description>The dataset evaluation package for the RotorS simulator.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
   <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
@@ -19,14 +20,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>cmake_modules</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>geometry_msgs</depend>
-  <depend>mav_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>roscpp</depend>
-  <depend>sensor_msgs</depend>
-  <depend>control_toolbox</depend>
-
-
+  <depend>rospy</depend>
 </package>

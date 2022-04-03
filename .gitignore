@@ -2,7 +2,9 @@
 .cproject
 .project
 .settings
+.vscode
 *.pyc
 *~
 */models/iris/*.sdf
 *.user
+/build

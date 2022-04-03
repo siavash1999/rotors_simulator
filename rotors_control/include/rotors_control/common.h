@@ -89,8 +89,7 @@ inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configurat
     (*allocation_matrix)(1, i) = -cos(rotor.angle) * rotor.arm_length
                                  * rotor.rotor_force_constant;
     // Set third row of allocation matrix.
-    (*allocation_matrix)(2, i) = -rotor.direction * rotor.rotor_force_constant
-                                 * rotor.rotor_moment_constant;
+    (*allocation_matrix)(2, i) = -rotor.direction * rotor.rotor_moment_constant;
     // Set forth row of allocation matrix.
     (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
     ++i;
@@ -104,7 +103,6 @@ inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configurat
               << ", it should have rank 4, to have a fully controllable system,"
               << " check your configuration." << std::endl;
   }
-
 }
 
 inline void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
@@ -115,6 +113,24 @@ inline void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_
 
 inline void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
   *vector << skew_matrix(2, 1), skew_matrix(0,2), skew_matrix(1, 0);
+}
+inline void quaternionToEuler(Eigen::Quaterniond q, Eigen::Vector3d* euler) {
+    // roll (x-axis rotation)
+    double sinr_cosp = 2 * (q.w() * q.x() + q.y() * q.z());
+    double cosr_cosp = 1 - 2 * (q.y() * q.y() + q.x() * q.x());
+    euler->x() = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = 2 * (q.w() * q.y() - q.z() * q.x());
+    if (std::abs(sinp) >= 1)
+        euler->y() = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        euler->y() = std::asin(sinp);
+
+    // yaw (z-axis rotation)
+    double siny_cosp = 2 * (q.w() * q.z() + q.x() * q.y());
+    double cosy_cosp = 1 - 2 * (q.y() * q.y() + q.z() * q.z());
+    euler->z() = std::atan2(siny_cosp, cosy_cosp);
 }
 }
 
