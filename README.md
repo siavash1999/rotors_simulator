@@ -140,10 +140,11 @@ Changes to the main branch
 --------------------------
 
 1. Changed the README.md file.
-2. Deleted some packages that had no usage in my work.
+2. Made a LQR controller for stablizing position and orientation of pelican drone, with a launch file for simulation.
 
 **TODO:**
 
-3. Make a new controller for flight control.
+3. Make a PID controller.
+4. Make PID controller parameters dynamically reconfigurable.
 4. Import simple maps to world files.
 5. Make path-planning nodes to send velocity messages.
