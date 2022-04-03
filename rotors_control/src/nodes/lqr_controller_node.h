@@ -81,4 +81,4 @@ class LqrControllerNode {
 };
 }
 
-#endif // ROTORS_CONTROL_IDAS_CONTROLLER_NODE_H
+#endif // ROTORS_CONTROL_LQR_CONTROLLER_NODE_H

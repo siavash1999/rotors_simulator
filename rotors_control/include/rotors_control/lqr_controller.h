@@ -46,7 +46,7 @@ class LqrController {
   LqrController();
   ~LqrController();
   void InitializeParameters();
-  void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities, Eigen::Vector3d* angle_error) const;
+  void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
   void SetOdometry(const EigenOdometry& odometry);
   void SetTrajectoryPoint(
@@ -66,7 +66,7 @@ class LqrController {
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   EigenOdometry odometry_;
 
-  void ComputeError(Eigen::VectorXd* error_signal, Eigen::Vector3d* angle_error) const;
+  void ComputeError(Eigen::VectorXd* error_signal) const;
 };
 }
 

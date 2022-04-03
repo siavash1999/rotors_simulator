@@ -46,10 +46,6 @@ LqrControllerNode::LqrControllerNode(
   motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
       mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
-  roll_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/roll_err", 1);
-  pitch_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/pitch_err", 1);
-  yaw_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/yaw_err", 1);
-
   command_timer_ = nh_.createTimer(ros::Duration(0), &LqrControllerNode::TimedCommandCallback, this,
                                   true, false);
 }
@@ -57,71 +53,6 @@ LqrControllerNode::LqrControllerNode(
 LqrControllerNode::~LqrControllerNode() { }
 
 void LqrControllerNode::InitializeParams() {
-
-  // Read parameters from rosparam.
-  /* GetRosParameter(private_nh_, "velocity_gain/x/p",
-                  idas_controller_.controller_parameters_.velocity_gain_.p.x(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.p.x());
-  GetRosParameter(private_nh_, "velocity_gain/x/i",
-                  idas_controller_.controller_parameters_.velocity_gain_.i.x(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.i.x());
-  GetRosParameter(private_nh_, "velocity_gain/x/d",
-                  idas_controller_.controller_parameters_.velocity_gain_.d.x(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.d.x());
-  GetRosParameter(private_nh_, "velocity_gain/y/p",
-                  idas_controller_.controller_parameters_.velocity_gain_.p.y(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.p.y());
-  GetRosParameter(private_nh_, "velocity_gain/y/i",
-                  idas_controller_.controller_parameters_.velocity_gain_.i.y(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.i.y());
-  GetRosParameter(private_nh_, "velocity_gain/y/d",
-                  idas_controller_.controller_parameters_.velocity_gain_.d.y(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.d.y());
-  GetRosParameter(private_nh_, "velocity_gain/z/p",
-                  idas_controller_.controller_parameters_.velocity_gain_.p.z(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.p.z());
-  GetRosParameter(private_nh_, "velocity_gain/z/i",
-                  idas_controller_.controller_parameters_.velocity_gain_.i.z(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.i.z());
-  GetRosParameter(private_nh_, "velocity_gain/z/d",
-                  idas_controller_.controller_parameters_.velocity_gain_.d.z(),
-                  &idas_controller_.controller_parameters_.velocity_gain_.d.z());
-  GetRosParameter(private_nh_, "angular_rate_gain/roll/p",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.p.x(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.p.x());
-  GetRosParameter(private_nh_, "angular_rate_gain/roll/i",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.i.x(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.i.x());
-  GetRosParameter(private_nh_, "angular_rate_gain/roll/d",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.d.x(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.d.x());
-  GetRosParameter(private_nh_, "angular_rate_gain/pitch/p",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.p.y(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.p.y());
-  GetRosParameter(private_nh_, "angular_rate_gain/pitch/i",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.i.y(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.i.y());
-  GetRosParameter(private_nh_, "angular_rate_gain/pitch/d",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.d.y(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.d.y());
-  GetRosParameter(private_nh_, "angular_rate_gain/yaw/p",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.p.z(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.p.z());
-  GetRosParameter(private_nh_, "angular_rate_gain/yaw/i",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.i.z(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.i.z());
-  GetRosParameter(private_nh_, "angular_rate_gain/yaw/d",
-                  idas_controller_.controller_parameters_.angular_rate_gain_.d.z(),
-                  &idas_controller_.controller_parameters_.angular_rate_gain_.d.z());
-  GetRosParameter(private_nh_, "angular_rate_gain/altitude_gain/p",
-                  idas_controller_.controller_parameters_.altitude_gain_.x(),
-                  &idas_controller_.controller_parameters_.altitude_gain_.x());
-  GetRosParameter(private_nh_, "angular_rate_gain/altitude_gain/i",
-                  idas_controller_.controller_parameters_.altitude_gain_.y(),
-                  &idas_controller_.controller_parameters_.altitude_gain_.y());
-  GetRosParameter(private_nh_, "angular_rate_gain/altitude_gain/d",
-                  idas_controller_.controller_parameters_.altitude_gain_.z(),
-                  &idas_controller_.controller_parameters_.altitude_gain_.z()); */
   GetVehicleParameters(private_nh_, &lqr_controller_.vehicle_parameters_);
   lqr_controller_.InitializeParameters();
 }
@@ -206,16 +137,9 @@ void LqrControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   eigenOdometryFromMsg(odometry_msg, &odometry);
   lqr_controller_.SetOdometry(odometry);
 
-  Eigen::Vector3d angle_error;
   Eigen::VectorXd ref_rotor_velocities;
-  lqr_controller_.CalculateRotorVelocities(&ref_rotor_velocities, &angle_error);
+  lqr_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
-  std_msgs::Float32 roll_error;
-  roll_error.data = angle_error(0);
-  std_msgs::Float32 pitch_error;
-  pitch_error.data = angle_error(1);
-  std_msgs::Float32 yaw_error;
-  yaw_error.data = angle_error(2);
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
@@ -225,19 +149,16 @@ void LqrControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   actuator_msg->header.stamp = odometry_msg->header.stamp;
 
   motor_velocity_reference_pub_.publish(actuator_msg);
-  roll_error_pub_.publish(roll_error);
-  pitch_error_pub_.publish(pitch_error);
-  yaw_error_pub_.publish(yaw_error);
 }
 
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "idas_controller_node");
+  ros::init(argc, argv, "lqr_controller_node");
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-  rotors_control::LqrControllerNode idas_controller_node(nh, private_nh);
+  rotors_control::LqrControllerNode lqr_controller_node(nh, private_nh);
   ros::spin();
 
   return 0;

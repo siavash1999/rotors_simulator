@@ -46,7 +46,7 @@ void LqrController::InitializeParameters() {
   initialized_params_ = true;
 }
 
-void LqrController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities, Eigen::Vector3d* angle_error) const {
+void LqrController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 
@@ -58,7 +58,7 @@ void LqrController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities, 
   }
 
   Eigen::VectorXd error_signal(12);
-  ComputeError(&error_signal, angle_error);
+  ComputeError(&error_signal);
 
   Eigen::Vector4d control_input;
   control_input = control_gain * error_signal;
@@ -78,7 +78,7 @@ void LqrController::SetTrajectoryPoint(
   controller_active_ = true;
 }
 
-void LqrController::ComputeError(Eigen::VectorXd* error_signal, Eigen::Vector3d* angle_error) const {
+void LqrController::ComputeError(Eigen::VectorXd* error_signal) const {
   Eigen::Vector3d position_error;
   position_error = command_trajectory_.position_W - odometry_.position;
   error_signal->block<3,1>(9,0) = position_error;
@@ -94,8 +94,8 @@ void LqrController::ComputeError(Eigen::VectorXd* error_signal, Eigen::Vector3d*
   Eigen::Vector3d odometry_euler;
   quaternionToEuler(command_trajectory_.orientation_W_B, &command_trajectory_euler);
   quaternionToEuler(odometry_.orientation, &odometry_euler);
-  *angle_error = command_trajectory_euler - odometry_euler;
-  error_signal->block<3,1>(0,0) = *angle_error;
+  Eigen::Vector3d angle_error = command_trajectory_euler - odometry_euler;
+  error_signal->block<3,1>(0,0) = angle_error;
 
   Eigen::Vector3d angular_velocity_error = (R_W_I.transpose() * command_trajectory_.angular_velocity_W
                    - odometry_.angular_velocity);
