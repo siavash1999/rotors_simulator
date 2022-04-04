@@ -34,7 +34,7 @@ namespace rotors_control {
 // Default values.
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandMotorSpeedTopic =
-    mav_msgs::default_topics::COMMAND_ACTUATORS; // "command/motor_speed";
+    mav_msgs::default_topics::COMMAND_ACTUATORS; // "command/motor_speed"
 static const std::string kDefaultCommandMultiDofJointTrajectoryTopic =
     mav_msgs::default_topics::COMMAND_TRAJECTORY; // "command/trajectory"
 static const std::string kDefaultCommandRollPitchYawrateThrustTopic =
