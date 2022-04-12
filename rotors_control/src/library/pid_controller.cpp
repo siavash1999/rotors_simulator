@@ -78,13 +78,12 @@ void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_
 
   quaternionToEuler(odometry_.orientation, euler_angles_ptr);
 
-  yaw_rotation << cos(euler_angles_ptr->z()), -sin(euler_angles_ptr->z()), 0,
-                  sin(euler_angles_ptr->z()),  cos(euler_angles_ptr->z()), 0,
-                                           0,                           0, 1;
+  yaw_rotation <<  cos(euler_angles_ptr->z()), sin(euler_angles_ptr->z()), 0,
+                  -sin(euler_angles_ptr->z()), cos(euler_angles_ptr->z()), 0,
+                                            0,                          0, 1;
 
-  *roll_pitch_thrust_ptr = yaw_rotation * 
-                           (position_gain.cwiseProduct(command_trajectory_.position_W - odometry_.position) + 
-                           velocity_gain.cwiseProduct(command_trajectory_.velocity_W - odometry_.velocity));
+  *roll_pitch_thrust_ptr = (position_gain.cwiseProduct(yaw_rotation * (command_trajectory_.position_W - odometry_.position)) + 
+                           velocity_gain.cwiseProduct(-odometry_.velocity));
   double temp = (*roll_pitch_thrust_ptr).x();
   (*roll_pitch_thrust_ptr).x() = (*roll_pitch_thrust_ptr).y();
   (*roll_pitch_thrust_ptr).y() = temp;
@@ -93,8 +92,8 @@ void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_
 
 void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, Eigen::Vector3d* angle_error) const {
   // TODO: do something for direct command for attitude. Same procedure for gains.
-  Eigen::Vector3d attitude_gain(1.5, 1.5, 0.004);
-  Eigen::Vector3d angular_velocity_gain(0.2, 0.2, 0.012);
+  Eigen::Vector3d attitude_gain(1.5, 1.5, 0.4);
+  Eigen::Vector3d angular_velocity_gain(0.2, 0.2, 0.12);
   Eigen::Vector3d roll_pitch_thrust;
   Eigen::Vector3d euler_angles;
   CalculateRollPitchThrust(&roll_pitch_thrust, &euler_angles);
