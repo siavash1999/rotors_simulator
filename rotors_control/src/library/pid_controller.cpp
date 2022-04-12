@@ -55,7 +55,6 @@ void PidController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities, 
   Eigen::Vector4d control_input;
   CalculateThrustMoments(&control_input, angle_error);
 
-  control_input(3) += vehicle_parameters_.mass_ * 9.81;
   *rotor_velocities = control_input_to_rotor_velocities_ * control_input;
   *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
@@ -89,6 +88,7 @@ void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_
   double temp = (*roll_pitch_thrust_ptr).x();
   (*roll_pitch_thrust_ptr).x() = (*roll_pitch_thrust_ptr).y();
   (*roll_pitch_thrust_ptr).y() = temp;
+  (*roll_pitch_thrust_ptr).z() += vehicle_parameters_.mass_ * 9.81;
 }
 
 void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, Eigen::Vector3d* angle_error) const {
@@ -100,8 +100,8 @@ void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, E
   CalculateRollPitchThrust(&roll_pitch_thrust, &euler_angles);
 
   Eigen::Vector3d desired_attitude;
+  quaternionToEuler(command_trajectory_.orientation_W_B, &desired_attitude);
   desired_attitude.segment<2>(0) = roll_pitch_thrust.segment<2>(0);
-  desired_attitude.z() = roll_pitch_thrust.z();
 
   control_input_ptr->segment<3>(0) = attitude_gain.cwiseProduct(desired_attitude - euler_angles) +
                                      angular_velocity_gain.cwiseProduct(-odometry_.angular_velocity);
