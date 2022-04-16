@@ -102,9 +102,15 @@ void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, E
   quaternionToEuler(command_trajectory_.orientation_W_B, &desired_attitude);
   desired_attitude.segment<2>(0) = roll_pitch_thrust.segment<2>(0);
 
-  control_input_ptr->segment<3>(0) = attitude_gain.cwiseProduct(desired_attitude - euler_angles) +
+  *angle_error = desired_attitude - euler_angles;
+  if ((*angle_error).z() > M_PI) {
+    (*angle_error).z() -= 2 * M_PI;
+  }
+  else if ((*angle_error).z() < - M_PI) {
+    (*angle_error).z() += 2 * M_PI;
+  }
+  control_input_ptr->segment<3>(0) = attitude_gain.cwiseProduct(*angle_error) +
                                      angular_velocity_gain.cwiseProduct(-odometry_.angular_velocity);
   control_input_ptr->w() = roll_pitch_thrust.z();
-  *angle_error = desired_attitude - euler_angles;
 }
 }
