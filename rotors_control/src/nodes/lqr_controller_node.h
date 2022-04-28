@@ -61,9 +61,9 @@ class LqrControllerNode {
   ros::Subscriber odometry_sub_;
 
   ros::Publisher motor_velocity_reference_pub_;
-  ros::Publisher roll_error_pub_;
-  ros::Publisher pitch_error_pub_;
-  ros::Publisher yaw_error_pub_;
+  ros::Publisher roll_angle_pub_;
+  ros::Publisher pitch_angle_pub_;
+  ros::Publisher yaw_angle_pub_;
 
   mav_msgs::EigenTrajectoryPointDeque commands_;
   std::deque<ros::Duration> command_waiting_times_;

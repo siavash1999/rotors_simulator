@@ -48,6 +48,9 @@ LqrControllerNode::LqrControllerNode(
 
   command_timer_ = nh_.createTimer(ros::Duration(0), &LqrControllerNode::TimedCommandCallback, this,
                                   true, false);
+  roll_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/roll", 1);
+  pitch_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/pitch", 1);
+  yaw_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/yaw", 1);
 }
 
 LqrControllerNode::~LqrControllerNode() { }
@@ -137,10 +140,17 @@ void LqrControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   eigenOdometryFromMsg(odometry_msg, &odometry);
   lqr_controller_.SetOdometry(odometry);
 
+  Eigen::Vector3d euler_angle;
   Eigen::VectorXd ref_rotor_velocities;
-  lqr_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+  lqr_controller_.CalculateRotorVelocities(&ref_rotor_velocities, &euler_angle);
 
-  // Todo(ffurrer): Do this in the conversions header.
+  std_msgs::Float32 roll_angle;
+  roll_angle.data = euler_angle.x();
+  std_msgs::Float32 pitch_angle;
+  pitch_angle.data = euler_angle.y();
+  std_msgs::Float32 yaw_angle;
+  yaw_angle.data = euler_angle.z();
+
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
   actuator_msg->angular_velocities.clear();
@@ -149,6 +159,9 @@ void LqrControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   actuator_msg->header.stamp = odometry_msg->header.stamp;
 
   motor_velocity_reference_pub_.publish(actuator_msg);
+  roll_angle_pub_.publish(roll_angle);
+  pitch_angle_pub_.publish(pitch_angle);
+  yaw_angle_pub_.publish(yaw_angle);
 }
 
 }

@@ -46,9 +46,9 @@ PidControllerNode::PidControllerNode(
   motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
       mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
-  roll_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/roll_err", 1);
-  pitch_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/pitch_err", 1);
-  yaw_error_pub_ = nh_.advertise<std_msgs::Float32>("debug/yaw_err", 1);
+  roll_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/roll", 1);
+  pitch_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/pitch", 1);
+  yaw_angle_pub_ = nh_.advertise<std_msgs::Float32>("/pelican/angles/yaw", 1);
 
   command_timer_ = nh_.createTimer(ros::Duration(0), &PidControllerNode::TimedCommandCallback, this,
                                   true, false);
@@ -206,17 +206,17 @@ void PidControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   eigenOdometryFromMsg(odometry_msg, &odometry);
   pid_controller_.SetOdometry(odometry);
 
-  Eigen::Vector3d angle_error;
+  Eigen::Vector3d angle_euler;
   Eigen::VectorXd ref_rotor_velocities;
-  pid_controller_.CalculateRotorVelocities(&ref_rotor_velocities, &angle_error);
+  pid_controller_.CalculateRotorVelocities(&ref_rotor_velocities, &angle_euler);
 
-  std_msgs::Float32 roll_error;
-  roll_error.data = angle_error(0);
-  std_msgs::Float32 pitch_error;
-  pitch_error.data = angle_error(1);
-  std_msgs::Float32 yaw_error;
-  yaw_error.data = angle_error(2);
-  // Todo(ffurrer): Do this in the conversions header.
+  std_msgs::Float32 roll_angle;
+  roll_angle.data = angle_euler.x();
+  std_msgs::Float32 pitch_angle;
+  pitch_angle.data = angle_euler.y();
+  std_msgs::Float32 yaw_angle;
+  yaw_angle.data = angle_euler.z();
+
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
   actuator_msg->angular_velocities.clear();
@@ -225,9 +225,9 @@ void PidControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odome
   actuator_msg->header.stamp = odometry_msg->header.stamp;
 
   motor_velocity_reference_pub_.publish(actuator_msg);
-  roll_error_pub_.publish(roll_error);
-  pitch_error_pub_.publish(pitch_error);
-  yaw_error_pub_.publish(yaw_error);
+  roll_angle_pub_.publish(roll_angle);
+  pitch_angle_pub_.publish(pitch_angle);
+  yaw_angle_pub_.publish(yaw_angle);
 }
 
 }

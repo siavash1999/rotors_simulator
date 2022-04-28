@@ -70,16 +70,16 @@ void PidController::SetTrajectoryPoint(
   controller_active_ = true;
 }
 
-void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_ptr, Eigen::Vector3d* euler_angles_ptr) const {
+void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_ptr, Eigen::Vector3d* euler_angle) const {
   // TODO: Make parameters for gains, store them in parameter server, make them dynamically reconfigurable.
   Eigen::Vector3d position_gain(0.05, -0.05, 4);
   Eigen::Vector3d velocity_gain( 0.1,  -0.1, 7);
   Eigen::Matrix3d yaw_rotation;
 
-  quaternionToEuler(odometry_.orientation, euler_angles_ptr);
+  quaternionToEuler(odometry_.orientation, euler_angle);
 
-  yaw_rotation <<  cos(euler_angles_ptr->z()), sin(euler_angles_ptr->z()), 0,
-                  -sin(euler_angles_ptr->z()), cos(euler_angles_ptr->z()), 0,
+  yaw_rotation <<  cos(euler_angle->z()), sin(euler_angle->z()), 0,
+                  -sin(euler_angle->z()), cos(euler_angle->z()), 0,
                                             0,                          0, 1;
 
   *roll_pitch_thrust_ptr = (position_gain.cwiseProduct(yaw_rotation * (command_trajectory_.position_W - odometry_.position)) + 
@@ -90,26 +90,25 @@ void PidController::CalculateRollPitchThrust(Eigen::Vector3d* roll_pitch_thrust_
   (*roll_pitch_thrust_ptr).z() += vehicle_parameters_.mass_ * 9.81;
 }
 
-void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, Eigen::Vector3d* angle_error) const {
+void PidController::CalculateThrustMoments(Eigen::Vector4d* control_input_ptr, Eigen::Vector3d* euler_angle) const {
   // TODO: do something for direct command for attitude. Same procedure for gains.
   Eigen::Vector3d attitude_gain(1.5, 1.5, 0.4);
   Eigen::Vector3d angular_velocity_gain(0.2, 0.2, 0.12);
   Eigen::Vector3d roll_pitch_thrust;
-  Eigen::Vector3d euler_angles;
-  CalculateRollPitchThrust(&roll_pitch_thrust, &euler_angles);
+  CalculateRollPitchThrust(&roll_pitch_thrust, euler_angle);
 
   Eigen::Vector3d desired_attitude;
   quaternionToEuler(command_trajectory_.orientation_W_B, &desired_attitude);
   desired_attitude.segment<2>(0) = roll_pitch_thrust.segment<2>(0);
 
-  *angle_error = desired_attitude - euler_angles;
-  if ((*angle_error).z() > M_PI) {
-    (*angle_error).z() -= 2 * M_PI;
+  Eigen::Vector3d angle_error = desired_attitude - *euler_angle;
+  if (angle_error.z() > M_PI) {
+    angle_error.z() -= 2 * M_PI;
   }
-  else if ((*angle_error).z() < - M_PI) {
-    (*angle_error).z() += 2 * M_PI;
+  else if (angle_error.z() < - M_PI) {
+    angle_error.z() += 2 * M_PI;
   }
-  control_input_ptr->segment<3>(0) = attitude_gain.cwiseProduct(*angle_error) +
+  control_input_ptr->segment<3>(0) = attitude_gain.cwiseProduct(angle_error) +
                                      angular_velocity_gain.cwiseProduct(-odometry_.angular_velocity);
   control_input_ptr->w() = roll_pitch_thrust.z();
 }
